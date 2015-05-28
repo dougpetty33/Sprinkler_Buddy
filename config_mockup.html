@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js">
+</script>
+<script>
+var url = "endofpi.com"
+$(document).ready(function(){
+ 
+$("#net").click(function(){$.post(url, '{cmd:"sys", net: ' + $("#stat").prop("checked") + ', status: ' + $("#ip").val() + '}');});
+
+$("input[name=z*]:radio").change(function(){
+	var zone_radio = $(this); var zone = zone_radio.attr("data-zone");
+	var zone_status = $('input:radio[name=' + zone_radio.attr("name") + ']:checked').val();
+	$.post(url,'{cmd:"zone", zone: ' + zone + ', status: ' + zone_status + '}');});});
+</script>
+</head>
+<body style="background-color:#E8E8E8;">
+<center><h1>Little Victories</h1>
+<p style="background-color:black;"><br></p>
+<h2>System Settings</h2>
+<table><tr><td>
+DHCP:</td><td><input type="radio" id="dhcp" checked name ="net1" value="true"><br></td></tr>
+<tr><td>Static</td><td><input type="radio" id="stat" name="net1" value="true"><input type="text" id="ip"></td></tr><br>
+</table><button id="net">Apply Network Settings</button>
+<p style="background-color:black;"><br></p>
+<center><h2>Zone Settings</h2></center>
+Zone 1:<input type="radio" data-zone="0" value="true" name="z0">On<input type="radio" data-zone="0" value="false" name="z0" checked>Off<br>
+Zone 2:<input type="radio" data-zone="1" value="true" name="z1">On<input type="radio" data-zone="1" value="false" name="z1" checked>Off<br>
+Zone 3:<input type="radio" data-zone="2" value="true" name="z2">On<input type="radio" data-zone="2" value="false" name="z2" checked>Off<br
+Zone 4:<input type="radio" data-zone="3" value="true" name="z3">On<input type="radio" data-zone="3" value="false" name="z3" checked>Off<br>
+Zone 5:<input type="radio" data-zone="4" value="true" name="z4">On<input type="radio" data-zone="4" value="false" name="z4" checked>Off<br>
+Zone 6:<input type="radio" data-zone="5" value="true" name="z5">On<input type="radio" data-zone="5" value="false" name="z5" checked>Off<br>
+Zone 7:<input type="radio" data-zone="6" value="true" name="z6">On<input type="radio" data-zone="6" value="false" name="z6" checked>Off<br>
+Zone 8:<input type="radio" data-zone="7" value="true" name="z7">On<input type="radio" data-zone="7" value="false" name="z7" checked>Off<br></center>
+</body>
+</html>
