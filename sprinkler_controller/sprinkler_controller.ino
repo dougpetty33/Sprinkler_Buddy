@@ -5,6 +5,7 @@
 #include <avr/pgmspace.h>
 #include <avr/wdt.h>
 #include <Ethernet.h>
+#include <EthernetUdp.h>
 #include <SPI.h>
 #include <TextFinder.h>
 #include <EEPROM.h>
@@ -37,6 +38,8 @@ const char string_18[] PROGMEM = "Zone 6:<input type=\"radio\" data-zone=\"5\" v
 const char string_19[] PROGMEM = "Zone 7:<input type=\"radio\" data-zone=\"6\" value=\"1\" name=\"z_6\">On<input type=\"radio\" data-zone=\"6\" value=\"0\" name=\"z_6\" checked>Off<br>";
 const char string_20[] PROGMEM = "Zone 8:<input type=\"radio\" data-zone=\"7\" value=\"1\" name=\"z_7\">On<input type=\"radio\" data-zone=\"7\" value=\"0\" name=\"z_7\" checked>Off<br></center>";
 const char string_21[] PROGMEM = "</body></html>";
+
+const char multicast_response[] PROGMEM = "HTTP/1.1 200 OK\r\nMX: 5\r\nST: upnp:rootdevice\r\nMAN: \"sddp:discover\"\r\nUser-Agent: UPnP/1.0 DLNADOC/1.50 Platinum/1.0.4.11\r\nConnection: close\r\nHost: 239.225.225.250:1900\r\n\r\n\r\n";
 
 const char *config_page[] = {
   string_0,
@@ -76,11 +79,18 @@ char cBuffer[5];
 char cmdBuffer[50];
 byte currentState = 0;
 EthernetClient client;
+EthernetUDP udp;
 EthernetServer server(80);
+byte multi_ip[] = {239, 225, 225, 250};
+const unsigned int multi_port = 1900;
 boolean isStatic = false;
 const int net_config = 0;
 const int mac_addy = 1;
 const int ip_addy = 7;
+
+char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
+byte remoteIp[4];
+unsigned int remote_port;
 
 //shift pins
 const int data = 10;
@@ -117,6 +127,7 @@ void setup(){
           } 
     Ethernet.begin(mac, ip);
   }
+  
   //The user has opted for DHCP
   else
   {
@@ -130,10 +141,27 @@ void setup(){
   server.begin();
   delay(3000);
   Serial.println(Ethernet.localIP());
+  udp.beginMulti(multi_ip, multi_port);
 }
 
 void loop(){
   client = server.available();
+  int packetSize = udp.parsePacket();
+  if(packetSize)
+  {
+    //query
+    //todo: need to look to see if the multicast was meant for us
+     IPAddress remote = udp.remoteIP();
+     udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
+     Serial.println("packet:");
+     Serial.println(packetBuffer);
+     
+     //response
+     udp.beginPacket(remote, udp.remotePort());
+     udp.write(strcpy_P(buffer, (char*)pgm_read_word(&(multicast_response))));
+     udp.endPacket();
+   }
+  
   //If the client is connected we should see what they want
   if(client){
     TextFinder finder(client);
@@ -175,6 +203,7 @@ void loop(){
   }
 }
 
+//Ex: {"cmd":"zone", "zone":"1","status":"1"}
 void parseCmd(char jString[]){
   JsonParser<32> parser;
   JsonHashTable hashTable = parser.parseHashTable(jString);
