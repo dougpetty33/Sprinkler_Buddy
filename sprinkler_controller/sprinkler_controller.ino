@@ -29,8 +29,7 @@ byte zones[] = {
   1, 2, 4, 8, 16, 32, 64, 128};
 byte zStatus[] = {
   false, false, false, false, false, false, false, false};
-char buffer[200];
-char packetBuffer[50];
+char packetBuffer[200];
 char  ReplyBuffer[] = "http/1.1 200 ok\r\nST: zerolimits:sprinkler\r\n\r\n";  
 char cBuffer[5];
 char cmdBuffer[50];
